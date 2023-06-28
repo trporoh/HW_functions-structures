@@ -76,7 +76,7 @@ int main() {
 	do {
 
 		printf("press 1 for show\npress 2 for add\npress 3 for search or delete\npress 4 for exit\n");
-		char number = getchar();
+		number = getchar();
         getchar();
 
 		switch (number) {
