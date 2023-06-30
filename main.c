@@ -1,77 +1,87 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct member_list {
 	char name[20];
 	char surname[20];
 	char number[20];
+	struct member_list* next;
 };
 
 int prog = 1;
 
-void show(struct member_list* list, int size) {
+void show(struct member_list* list) {
 
-	for (int i = 0; i < size;i++) {
-
-		printf("\n%s \n%s \n%s \n\n", list[i].name, list[i].surname, list[i].number);
+	struct member_list* ptr = list;
+	while(ptr){
+		printf("\n%s \n%s \n%s \n\n", ptr->name, ptr->surname, ptr->number);
+		ptr = ptr->next;
 	}
 }
 
-void add(struct member_list* list, int size) {
+void add(struct member_list** list) {
 
+	struct member_list* ptr = malloc(sizeof(struct member_list));
 
 	printf("Enter the name: \n");
-	fgets(list[size].name, sizeof(list[size].name), stdin);
-	list[size].name[strcspn(list[size].name, "\n")] = '\0';
+	fgets(ptr->name, sizeof(ptr->name), stdin);
+	ptr->name[strcspn(ptr->name, "\n")] = '\0';
 
 	printf("Enter the surname: \n");
-	fgets(list[size].surname, sizeof(list[size].surname), stdin);
-	list[size].surname[strcspn(list[size].surname, "\n")] = '\0';
+	fgets(ptr->surname, sizeof(ptr->surname), stdin);
+	ptr->surname[strcspn(ptr->surname, "\n")] = '\0';
 
 
 	printf("Enter the number: \n");
-	fgets(list[size].number, sizeof(list[size].number), stdin);
-	list[size].number[strcspn(list[size].number, "\n")] = '\0';
+	fgets(ptr->number, sizeof(ptr->number), stdin);
+	ptr->number[strcspn(ptr->number, "\n")] = '\0';
+	
 
+	ptr->next = *list;
+	*list = ptr;
 }
 
-int search(struct member_list* list, char* number, int size) {
+struct member_list* search(struct member_list* list, char* number) {
 
-	for (int i = 0; i < size; i++) {
-	        if (strcmp(list[i].number, number) == 0) {
-				printf("Contact found:\n");
-				printf("%s\n", list[i].name);
-				printf("%s\n", list[i].surname);
-				printf("%s\n", list[i].number);
-				return i;
-        }
+	struct member_list* prev = list;
+	struct member_list* ptr = list;
+
+	while(ptr){
+	    if (strcmp(ptr->number, number) == 0) {
+			printf("Contact found:\n");
+			printf("%s\n", ptr->name);
+			printf("%s\n", ptr->surname);
+			printf("%s\n", ptr->number);
+			return prev;
+		}
+		prev = ptr;
+		ptr = ptr->next;
 	}
+
 	printf("\nthere is no such number\n");
-	return -1;
+	return NULL;
+
 }
 
-void execute(struct member_list* list, int index, int size) {
+void execute(struct member_list* del) {
 
-	for (index; index < size; index++) {
-		list[index] = list[index + 1];
-	}
-	for (int i = 0; i < 20; i++) {
+	struct member_list* ptr = del->next;
 
-		list[size].name[i] = 0;
-		list[size].surname[i] = 0;
-		list[size].number[i] = 0;
-	}
+	del->next = ptr->next;
+	ptr->next = NULL;
+	free(ptr);
+
 }
 
 
 int main() {
 
-	struct member_list list[100];
+	struct member_list* list = NULL;
+	struct member_list* result_of_search;
 	char number;
 	char phone_number[20];
 	int del;
-	int size = 0;
-	int result_of_search;
 
 	do {
 
@@ -83,14 +93,13 @@ int main() {
 
 		case '1':
 
-			show(list, size);
+			show(list);
 			break;
 
 		case '2':
 
-			add(list, size);
+			add(&list);
 			system("clear");
-			size++;
 			break;
 
 		case '3':
@@ -99,15 +108,14 @@ int main() {
 			fgets(phone_number, 19, stdin);
 			phone_number[strcspn(phone_number, "\n")] = '\0';
 
-			result_of_search = search(&list, phone_number, size);
+			result_of_search = search(list, phone_number);
 			printf("delete?\n");
 			scanf("%d", &del);
 			getchar();
 
-			if (del && phone_number == -1) {
+			if (del && result_of_search) {
 
-				execute(&list, result_of_search, size);
-				size--;
+				execute(result_of_search);
 
 			}
 			break;
